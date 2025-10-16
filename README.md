@@ -1,4 +1,13 @@
 ## NOTICE
+**THIS IS THE THE REPOSITORY FORKED FROM FTC WITH SKETCHY MODIFICATIONS.** 
+
+
+
+
+
+
+
+
 
 This repository contains the public FTC SDK for the DECODE (2025-2026) competition season.
 
