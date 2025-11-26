@@ -126,7 +126,7 @@ public class BasicOpMode_Linear extends LinearOpMode {
                 leftFeeder.setPower(1);
             } else {
                 rightFeeder.setPower(0);
-                leftFeeder.setPower(0);
+                leftFeeder.setPower(0.0);
             }
 
             // -------------------------------
