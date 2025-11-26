@@ -87,6 +87,7 @@ public class BlueIntake_Score3_Auto extends LinearOpMode {
         sleep(425);
         leftfeeder.setPower(0);
         rightfeeder.setPower(0);
-        sleep(425);
+        sleep(426
+        );
     }
 }
