@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name="Good TeleOp use this one", group="Linear Opmode")
+@TeleOp(name="GOOD TeleOp use this one", group="Linear Opmode")
 public class BasicOpMode_Linear_super_really_bad_no_no_v2 extends LinearOpMode {
 
     private DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
@@ -25,7 +25,7 @@ public class BasicOpMode_Linear_super_really_bad_no_no_v2 extends LinearOpMode {
 
 //    static final double TICKS_PER_REV = 28.0;
 //    static final double TARGET_RPM = 2800;
-    static final double TARGET_VELOCITY = 1300; // ticks/sec
+    static final double TARGET_VELOCITY = 1350; // ticks/sec
 
     double F = 13;
     double P = 34;
@@ -130,10 +130,27 @@ public class BasicOpMode_Linear_super_really_bad_no_no_v2 extends LinearOpMode {
                 intake.setPower(0);
             }
 
+            if (gamepad1.b) {
+                leftFeeder.setPower(-1);
+                rightFeeder.setPower(1);
+            } else if (gamepad1.dpad_left) {
+                leftFeeder.setPower(1);
+                rightFeeder.setPower(-1);
+            } else {
+                leftFeeder.setPower(0);
+                rightFeeder.setPower(0);
+            }
+
+
+
+
 
             // -------- FLYWHEEL STABILITY & FEEDING --------
             double velocity = launcher.getVelocity();
             boolean inRange = Math.abs(velocity - TARGET_VELOCITY) < RPM_TOLERANCE;
+            telemetry.addData("Velocity", velocity);
+
+
 
             if (inRange) {//gamepad1.b &&
 

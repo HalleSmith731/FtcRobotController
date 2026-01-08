@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name="Orginal Auto", group="Linear Opmode")
-public class Auto_Encoders extends LinearOpMode {
+@Autonomous(name="RED Goal Auto", group="Linear Opmode")
+public class Auto_RED_Goal extends LinearOpMode {
 
     private DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
     private DcMotorEx launcher;
@@ -22,13 +22,12 @@ public class Auto_Encoders extends LinearOpMode {
             TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_IN);
 
     // ---------------- SHOOTER CONSTANTS ----------------
-//    static final double RPM_TOLERANCE = 300;
     static final int SHOTS = 3;
     static final double TARGET_VELOCITY = 1350; // ticks/sec
+    static final double RPM_TOLERANCE = 100;
 
     double F = 13;
     double P = 34;
-    static final double RPM_TOLERANCE = 100;
 
     @Override
     public void runOpMode() {
@@ -61,83 +60,43 @@ public class Auto_Encoders extends LinearOpMode {
         if (!opModeIsActive()) return;
 
         // =====================================================
-        // 1️⃣ DRIVE FORWARD
+        // 1️⃣ STRAFE LEFT
         // =====================================================
-        driveEncoder(-13, 0.6);
-
-
-        // ======================================       ===============
-        // 2️⃣ SPIN UP + SHOOT 3 BALLS (ENCODER CONTROLLED)
-        // =====================================================
+        driveEncoder(-12, 0.6);
         shootBallsEncoderBased();
+        strafeEncoder(13, 0.9);
 
         // =====================================================
-        // 3️⃣ DRIVE BACK
+        // 2️⃣ SHOOT
         // =====================================================
+
     }
 
     // =====================================================
-    // SHOOTER FUNCTION (NO SLEEP)
+    // SHOOTER FUNCTION
     // =====================================================
     void shootBallsEncoderBased() {
 
         launcher.setVelocity(TARGET_VELOCITY);
 
-        ElapsedTime rpmTimer = new ElapsedTime();
         ElapsedTime feedTimer = new ElapsedTime();
-
-        int lastPos = launcher.getCurrentPosition();
-        double rpm = 0;
-
         int shotsFired = 0;
-        boolean feeding = false;
 
         while (opModeIsActive() && shotsFired < SHOTS) {
+
             double velocity = launcher.getVelocity();
             boolean inRange = Math.abs(velocity - TARGET_VELOCITY) < RPM_TOLERANCE;
-            if (inRange) {
 
-
-                // ---- RPM CALCULATION ----
-//            if (rpmTimer.seconds() >= RPM_SAMPLE_TIME) {
-//                int currentPos = launcher.getCurrentPosition();
-//                int deltaTicks = currentPos - lastPos;
-//
-//                double revolutions =
-//                        deltaTicks / (FLYWHEEL_TICKS_PER_REV * FLYWHEEL_GEAR_RATIO);
-//
-//                rpm = (revolutions / rpmTimer.seconds()) * 60.0;
-//
-//                lastPos = currentPos;
-//                rpmTimer.reset();
-//            }
-//
-//            boolean rpmStable = Math.abs(rpm - TARGET_RPM) <= RPM_TOLERANCE;
-
-                // ---- FEED ONE BALL ----
-//            if (rpmStable && !feeding) {
-                if (feedTimer.seconds()>1) {
-                    leftfeeder.setPower(-1);
-                    rightfeeder.setPower(1);
-                    feedTimer.reset();
-                    shotsFired+=1;
-                }
-
-//                feedTimer.reset();
-//                feeding = true;
-//            }
-//
-//            if (feeding && feedTimer.seconds() >= FEED_TIME) {
-//                leftfeeder.setPower(0);
-//                rightfeeder.setPower(0);
-//                feeding = false;
-//            }
+            if (inRange && feedTimer.seconds() > 1) {
+                leftfeeder.setPower(-1);
+                rightfeeder.setPower(1);
+                feedTimer.reset();
+                shotsFired++;
             }
 
-            telemetry.addData("RPM", (int) rpm);
+            telemetry.addData("Velocity", velocity);
             telemetry.addData("Shots Fired", shotsFired);
             telemetry.update();
-
         }
 
         launcher.setVelocity(0);
@@ -146,7 +105,7 @@ public class Auto_Encoders extends LinearOpMode {
     }
 
     // =====================================================
-    // DRIVE FUNCTIONS (UNCHANGED)
+    // DRIVE FUNCTIONS
     // =====================================================
     void resetEncoders() {
         frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -160,6 +119,7 @@ public class Auto_Encoders extends LinearOpMode {
         backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    // FORWARD / BACK
     void driveEncoder(double inches, double power) {
 
         int ticks = (int)(inches * TICKS_PER_INCH);
@@ -186,11 +146,35 @@ public class Auto_Encoders extends LinearOpMode {
         }
 
         stopDrive();
+    }
 
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    // STRAFE
+    void strafeEncoder(double inches, double power) {
+
+        int ticks = (int)(inches * TICKS_PER_INCH * 1.1); // strafing compensation
+
+        frontLeftDrive.setTargetPosition(frontLeftDrive.getCurrentPosition() + ticks);
+        frontRightDrive.setTargetPosition(frontRightDrive.getCurrentPosition() - ticks);
+        backLeftDrive.setTargetPosition(backLeftDrive.getCurrentPosition() - ticks);
+        backRightDrive.setTargetPosition(backRightDrive.getCurrentPosition() + ticks);
+
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeftDrive.setPower(power);
+        frontRightDrive.setPower(power);
+        backLeftDrive.setPower(power);
+        backRightDrive.setPower(power);
+
+        while (opModeIsActive() &&
+                (frontLeftDrive.isBusy() || frontRightDrive.isBusy()
+                        || backLeftDrive.isBusy() || backRightDrive.isBusy())) {
+            telemetry.update();
+        }
+
+        stopDrive();
     }
 
     void stopDrive() {
@@ -198,5 +182,10 @@ public class Auto_Encoders extends LinearOpMode {
         frontRightDrive.setPower(0);
         backLeftDrive.setPower(0);
         backRightDrive.setPower(0);
+
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
