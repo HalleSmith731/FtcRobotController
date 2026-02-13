@@ -10,26 +10,20 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name="GOOD TeleOp use this one", group="Linear Opmode")
-public class BasicOpMode_Linear_super_really_bad_no_no_v2 extends LinearOpMode {
+public class TeleOp_good extends LinearOpMode {
 
     private DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
 
     private DcMotorEx launcher;
 
-    private DigitalChannel ledRed, ledGreen;
-
     private CRServo rightFeeder, leftFeeder;
-    private DcMotor intake;
 
     private ElapsedTime runtime = new ElapsedTime();
-
-//    static final double TICKS_PER_REV = 28.0;
-//    static final double TARGET_RPM = 2800;
-    static final double TARGET_VELOCITY = 1350; // ticks/sec
+    static final double TARGET_VELOCITY = 1500; // ticks/sec
 
     double F = 13;
     double P = 34;
-    static final double RPM_TOLERANCE = 150;
+    static final double RPM_TOLERANCE = 70;
 
 //    private ElapsedTime flywheelStableTimer = new ElapsedTime();
 //    private boolean flywheelStable = false;
@@ -48,18 +42,10 @@ public class BasicOpMode_Linear_super_really_bad_no_no_v2 extends LinearOpMode {
         backRightDrive  = hardwareMap.get(DcMotor.class, "back_right_drive");
 
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        intake = hardwareMap.get(DcMotor.class, "intake");
 
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
         leftFeeder  = hardwareMap.get(CRServo.class, "left_feeder");
 
-        ledRed   = hardwareMap.get(DigitalChannel.class, "led_red");
-        ledGreen = hardwareMap.get(DigitalChannel.class, "led_green");
-
-        // -------- LED SETUP --------
-        ledRed.setMode(DigitalChannel.Mode.OUTPUT);
-        ledGreen.setMode(DigitalChannel.Mode.OUTPUT);
-        setLED(false, true); // RED by default
 
         // -------- MOTOR DIRECTIONS --------
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -90,9 +76,16 @@ public class BasicOpMode_Linear_super_really_bad_no_no_v2 extends LinearOpMode {
         while (opModeIsActive()) {
 
             // -------- MECANUM DRIVE --------
+            double normalSpeed = 1;
+            double slowSpeed = .4;
+
+// Hold left bumper for precision drive
+            double speed = gamepad1.left_bumper ? slowSpeed : normalSpeed;
+
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1;
             double turn = gamepad1.right_stick_x * 0.8;
+
 
             double fl = y + x + turn;
             double fr = y - x - turn;
@@ -115,20 +108,11 @@ public class BasicOpMode_Linear_super_really_bad_no_no_v2 extends LinearOpMode {
             // -------- LAUNCHER CONTROL --------
             if (gamepad1.right_bumper) {
                 launcher.setVelocity(TARGET_VELOCITY);
-                updateLauncherLED();
             } else {
                 launcher.setPower(0);
-                setLED(false, true); // RED
             }
 
             // intake
-            if (gamepad1.y) {
-                intake.setPower(0.75);
-            } else if (gamepad1.a) {
-                intake.setPower(-0.75);
-            } else {
-                intake.setPower(0);
-            }
 
             if (gamepad1.b) {
                 leftFeeder.setPower(-1);
@@ -205,18 +189,4 @@ public class BasicOpMode_Linear_super_really_bad_no_no_v2 extends LinearOpMode {
         return launcher.getVelocity() ;
     }
 
-    public void updateLauncherLED() {
-        if (Math.abs(getLauncherRPM() - TARGET_VELOCITY) <= RPM_TOLERANCE) {
-            setLED(true, false);   // GREEN
-        } else {
-            setLED(false, true);  // RED
-        }
-    }
-
-    // ACTIVE LOW LEDS
-    // greenOn, redOn
-    public void setLED(boolean green, boolean red) {
-        ledGreen.setState(!green);
-        ledRed.setState(!red);
-    }
 }

@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@Autonomous(name="Auto Goal Line", group="Linear Opmode")
+@Autonomous(name="GOAL Line Auto", group="Linear Opmode")
 public class Auto_Goal_Line extends LinearOpMode {
 
     private DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
@@ -42,7 +42,7 @@ public class Auto_Goal_Line extends LinearOpMode {
         // =====================================================
         // DRIVE FORWARD 16 INCHES
         // =====================================================
-        driveEncoder(-16, 0.6);
+        driveEncoder(-17, 0.45);
     }
 
     // =====================================================

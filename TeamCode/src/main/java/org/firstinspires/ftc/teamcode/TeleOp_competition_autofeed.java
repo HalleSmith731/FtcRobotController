@@ -5,74 +5,57 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name="Mecanum TeleOp RPM + LED V2", group="Linear Opmode")
-public class BasicOpMode_Linear_encoder_stateMachine_PIDF extends LinearOpMode {
+@TeleOp(name="Comp-Ready TeleOp AutoFeed", group="Linear Opmode")
+public class TeleOp_competition_autofeed extends LinearOpMode {
 
     private DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
-
     private DcMotorEx launcher;
-
-    private DigitalChannel ledRed, ledGreen;
-
     private CRServo rightFeeder, leftFeeder;
-    private DcMotor intake;
-
     private ElapsedTime runtime = new ElapsedTime();
-
-    static final double TICKS_PER_REV = 28.0;
-    static final double TARGET_RPM = 2750;
-    static final double TARGET_VELOCITY = (TARGET_RPM / 60.0) * TICKS_PER_REV; // ticks/sec
-    static final double RPM_TOLERANCE = 150;
-
     private ElapsedTime flywheelStableTimer = new ElapsedTime();
-    private boolean flywheelStable = false;
-    private boolean feeding = false;
-    static final double FEED_ON_TIME = 140;   // ms (short push)
-    static final double FEED_OFF_TIME = 120;  // ms (recovery)
 
+    static final double TARGET_VELOCITY = 1500; // flywheel ticks/sec
+    double F = 13;
+    double P = 34;
+    static final double RPM_TOLERANCE = 70;
+    static final double FLYWHEEL_STABLE_TIME = 0.25; // seconds
+
+    boolean flywheelStable = false;
 
     @Override
     public void runOpMode() {
 
-        // -------- HARDWARE MAP --------
+        // --- HARDWARE MAP ---
         frontLeftDrive  = hardwareMap.get(DcMotor.class, "front_left_drive");
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
         backLeftDrive   = hardwareMap.get(DcMotor.class, "back_left_drive");
         backRightDrive  = hardwareMap.get(DcMotor.class, "back_right_drive");
 
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        intake = hardwareMap.get(DcMotor.class, "intake");
-
         rightFeeder = hardwareMap.get(CRServo.class, "right_feeder");
         leftFeeder  = hardwareMap.get(CRServo.class, "left_feeder");
 
-        ledRed   = hardwareMap.get(DigitalChannel.class, "led_red");
-        ledGreen = hardwareMap.get(DigitalChannel.class, "led_green");
-
-        // -------- LED SETUP --------
-        ledRed.setMode(DigitalChannel.Mode.OUTPUT);
-        ledGreen.setMode(DigitalChannel.Mode.OUTPUT);
-        setLED(false, true); // RED by default
-
-        // -------- MOTOR DIRECTIONS --------
+        // --- MOTOR DIRECTIONS ---
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
 
-        // -------- MOTOR MODES --------
+        // --- MOTOR MODES ---
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, 0, 0, F);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
 
-        frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -80,13 +63,18 @@ public class BasicOpMode_Linear_encoder_stateMachine_PIDF extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        // ================= MAIN LOOP =================
+        // --- MAIN LOOP ---
         while (opModeIsActive()) {
 
-            // -------- MECANUM DRIVE --------
-            double y = -gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x * 1.1;
-            double turn = gamepad1.right_stick_x * 0.8;
+            // --- DRIVE CONTROL ---
+            double normalSpeed = 1.0;
+            double slowSpeed = 0.35; // precision drive
+            double speed = gamepad1.left_bumper ? slowSpeed : normalSpeed;
+
+            // Cubic scaling for precision
+            double y = Math.pow(-gamepad1.left_stick_y, 3) * speed;
+            double x = Math.pow(gamepad1.left_stick_x, 3) * speed;
+            double turn = Math.pow(gamepad1.right_stick_x, 3) * 0.6; // constant turn scaling
 
             double fl = y + x + turn;
             double fr = y - x - turn;
@@ -96,7 +84,6 @@ public class BasicOpMode_Linear_encoder_stateMachine_PIDF extends LinearOpMode {
             double max = Math.max(Math.abs(fl),
                     Math.max(Math.abs(fr),
                             Math.max(Math.abs(bl), Math.abs(br))));
-
             if (max > 1.0) {
                 fl /= max; fr /= max; bl /= max; br /= max;
             }
@@ -106,94 +93,45 @@ public class BasicOpMode_Linear_encoder_stateMachine_PIDF extends LinearOpMode {
             backLeftDrive.setPower(bl);
             backRightDrive.setPower(br);
 
-            // -------- LAUNCHER CONTROL --------
+            // --- LAUNCHER CONTROL ---
             if (gamepad1.right_bumper) {
                 launcher.setVelocity(TARGET_VELOCITY);
-                updateLauncherLED();
             } else {
                 launcher.setPower(0);
-                setLED(false, true); // RED
+                flywheelStable = false; // reset stable flag if launcher stops
             }
 
-            // intake
-            if (gamepad1.y) {
-                intake.setPower(0.75);
-            } else if (gamepad1.a) {
-                intake.setPower(-0.75);
-            } else {
-                intake.setPower(0);
-            }
-
-            // feeder
-            if (gamepad1.b) {
-                rightFeeder.setPower(1);
-                leftFeeder.setPower(-1);
-            } else {
-                rightFeeder.setPower(0);
-                leftFeeder.setPower(0);
-            }
-
-            // -------- FLYWHEEL STABILITY & FEEDING --------
+            // --- AUTO-FEEDER WITH 0.25s STABILITY ---
             double velocity = launcher.getVelocity();
             boolean inRange = Math.abs(velocity - TARGET_VELOCITY) < RPM_TOLERANCE;
 
-            if (gamepad1.right_bumper && inRange) {
-
-                // First time reaching stable speed
+            if (inRange) {
                 if (!flywheelStable) {
                     flywheelStable = true;
                     flywheelStableTimer.reset();
                 }
 
-                // FEED ON
-                if (!feeding && flywheelStableTimer.milliseconds() > FEED_OFF_TIME) {
-                    feeding = true;
-                    flywheelStableTimer.reset();
+                // Only feed after 0.25s stable
+                if (flywheelStableTimer.seconds() >= FLYWHEEL_STABLE_TIME) {
                     leftFeeder.setPower(-1);
                     rightFeeder.setPower(1);
-                }
-
-                // FEED OFF
-                if (feeding && flywheelStableTimer.milliseconds() > FEED_ON_TIME) {
-                    feeding = false;
-                    flywheelStableTimer.reset();
+                } else {
                     leftFeeder.setPower(0);
                     rightFeeder.setPower(0);
                 }
 
             } else {
                 flywheelStable = false;
-                feeding = false;
                 leftFeeder.setPower(0);
                 rightFeeder.setPower(0);
             }
 
-            // -------- TELEMETRY --------
+            // --- TELEMETRY ---
             telemetry.addData("Runtime", runtime.toString());
-            telemetry.addData("Launcher RPM", "%.0f", getLauncherRPM());
             telemetry.addData("Launcher Velocity", "%.0f", launcher.getVelocity());
+            telemetry.addData("Drive Speed", speed);
+            telemetry.addData("Flywheel Stable", flywheelStable);
             telemetry.update();
         }
-    }
-
-    // ================= FUNCTIONS =================
-
-    public double getLauncherRPM() {
-        return (launcher.getVelocity() / TICKS_PER_REV) * 60.0;
-    }
-
-    public void updateLauncherLED() {
-        if (Math.abs(getLauncherRPM() - TARGET_RPM) <= RPM_TOLERANCE) {
-            setLED(true, false);   // GREEN
-        } else {
-            setLED(false, true);  // RED
-        }
-    }
-
-    // ACTIVE LOW LEDS
-    // greenOn, redOn
-    public void setLED(boolean green, boolean red) {
-        ledGreen.setState(!green);
-        ledRed.setState(!red);
     }
 }

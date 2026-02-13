@@ -23,8 +23,8 @@ public class Auto_BLUE_Goal extends LinearOpMode {
 
     // ---------------- SHOOTER CONSTANTS ----------------
     static final int SHOTS = 3;
-    static final double TARGET_VELOCITY = 1350; // ticks/sec
-    static final double RPM_TOLERANCE = 100;
+    static final double TARGET_VELOCITY = 1500; // ticks/sec
+    static final double RPM_TOLERANCE = 70;
 
     double F = 13;
     double P = 34;
@@ -62,9 +62,9 @@ public class Auto_BLUE_Goal extends LinearOpMode {
         // =====================================================
         // 1️⃣ STRAFE LEFT
         // =====================================================
-        driveEncoder(-12, 0.6);
+        driveEncoder(-65, 0.7);
         shootBallsEncoderBased();
-        strafeEncoder(-13, 0.9);
+        strafeEncoder(-16, 0.4);
 
         // =====================================================
         // 2️⃣ SHOOT
