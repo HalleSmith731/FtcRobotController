@@ -15,13 +15,13 @@ public class Auto_RED_Goal extends LinearOpMode {
     private DcMotorEx launcher;
     private CRServo leftfeeder, rightfeeder;
 
-    // ---------------- DRIVE CONSTANTS ----------------
+    // drive constants
     static final double TICKS_PER_REV = 537.6;
     static final double WHEEL_DIAMETER_IN = 3.78;
     static final double TICKS_PER_INCH =
             TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_IN);
 
-    // ---------------- SHOOTER CONSTANTS ----------------
+    // shooter constants
     static final int SHOTS = 3;
     static final double TARGET_VELOCITY = 1500; // ticks/sec
     static final double RPM_TOLERANCE = 70;
@@ -32,7 +32,7 @@ public class Auto_RED_Goal extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        // ---------------- HARDWARE MAP ----------------
+        // hardware map
         frontLeftDrive = hardwareMap.get(DcMotor.class, "front_left_drive");
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
         backLeftDrive = hardwareMap.get(DcMotor.class, "back_left_drive");
@@ -59,22 +59,12 @@ public class Auto_RED_Goal extends LinearOpMode {
         waitForStart();
         if (!opModeIsActive()) return;
 
-        // =====================================================
-        // 1️⃣ STRAFE LEFT
-        // =====================================================
         driveEncoder(-65, 0.7);
         shootBallsEncoderBased();
         strafeEncoder(16, 0.4);
 
-        // =====================================================
-        // 2️⃣ SHOOT
-        // =====================================================
-
     }
 
-    // =====================================================
-    // SHOOTER FUNCTION
-    // =====================================================
     void shootBallsEncoderBased() {
 
         launcher.setVelocity(TARGET_VELOCITY);
@@ -104,9 +94,7 @@ public class Auto_RED_Goal extends LinearOpMode {
         rightfeeder.setPower(0);
     }
 
-    // =====================================================
-    // DRIVE FUNCTIONS
-    // =====================================================
+    // drive functions
     void resetEncoders() {
         frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -119,7 +107,6 @@ public class Auto_RED_Goal extends LinearOpMode {
         backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    // FORWARD / BACK
     void driveEncoder(double inches, double power) {
 
         int ticks = (int)(inches * TICKS_PER_INCH);
@@ -148,7 +135,6 @@ public class Auto_RED_Goal extends LinearOpMode {
         stopDrive();
     }
 
-    // STRAFE
     void strafeEncoder(double inches, double power) {
 
         int ticks = (int)(inches * TICKS_PER_INCH * 1.1); // strafing compensation

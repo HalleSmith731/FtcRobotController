@@ -59,22 +59,12 @@ public class Auto_BLUE_Goal extends LinearOpMode {
         waitForStart();
         if (!opModeIsActive()) return;
 
-        // =====================================================
-        // 1️⃣ STRAFE LEFT
-        // =====================================================
         driveEncoder(-65, 0.7);
         shootBallsEncoderBased();
         strafeEncoder(-16, 0.4);
 
-        // =====================================================
-        // 2️⃣ SHOOT
-        // =====================================================
-
     }
 
-    // =====================================================
-    // SHOOTER FUNCTION
-    // =====================================================
     void shootBallsEncoderBased() {
 
         launcher.setVelocity(TARGET_VELOCITY);
@@ -104,9 +94,7 @@ public class Auto_BLUE_Goal extends LinearOpMode {
         rightfeeder.setPower(0);
     }
 
-    // =====================================================
-    // DRIVE FUNCTIONS
-    // =====================================================
+    // drive functions
     void resetEncoders() {
         frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -148,7 +136,6 @@ public class Auto_BLUE_Goal extends LinearOpMode {
         stopDrive();
     }
 
-    // STRAFE
     void strafeEncoder(double inches, double power) {
 
         int ticks = (int)(inches * TICKS_PER_INCH * 1.1); // strafing compensation

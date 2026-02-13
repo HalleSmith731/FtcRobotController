@@ -25,11 +25,6 @@ public class TeleOp_good extends LinearOpMode {
     double P = 34;
     static final double RPM_TOLERANCE = 70;
 
-//    private ElapsedTime flywheelStableTimer = new ElapsedTime();
-//    private boolean flywheelStable = false;
-//    private boolean feeding = false;
-//    static final double FEED_ON_TIME = 140;   // ms (short push)
-//    static final double FEED_OFF_TIME = 140;  // ms (recovery)
 
 
     @Override
@@ -47,11 +42,11 @@ public class TeleOp_good extends LinearOpMode {
         leftFeeder  = hardwareMap.get(CRServo.class, "left_feeder");
 
 
-        // -------- MOTOR DIRECTIONS --------
+        // mecanum left
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
 
-        // -------- MOTOR MODES --------
+        // enoodcers
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -75,11 +70,11 @@ public class TeleOp_good extends LinearOpMode {
         // ================= MAIN LOOP =================
         while (opModeIsActive()) {
 
-            // -------- MECANUM DRIVE --------
+            // mecanum
             double normalSpeed = 1;
             double slowSpeed = .4;
 
-// Hold left bumper for precision drive
+// percision drive
             double speed = gamepad1.left_bumper ? slowSpeed : normalSpeed;
 
             double y = -gamepad1.left_stick_y;
@@ -105,7 +100,7 @@ public class TeleOp_good extends LinearOpMode {
             backLeftDrive.setPower(bl);
             backRightDrive.setPower(br);
 
-            // -------- LAUNCHER CONTROL --------
+            // -launcher control
             if (gamepad1.right_bumper) {
                 launcher.setVelocity(TARGET_VELOCITY);
             } else {
@@ -129,7 +124,7 @@ public class TeleOp_good extends LinearOpMode {
 
 
 
-            // -------- FLYWHEEL STABILITY & FEEDING --------
+            // flywheel stability and feeding
             double velocity = launcher.getVelocity();
             boolean inRange = Math.abs(velocity - TARGET_VELOCITY) < RPM_TOLERANCE;
             telemetry.addData("Velocity", velocity);
@@ -183,7 +178,7 @@ public class TeleOp_good extends LinearOpMode {
         }
     }
 
-    // ================= FUNCTIONS =================
+
 
     public double getLauncherRPM() {
         return launcher.getVelocity() ;

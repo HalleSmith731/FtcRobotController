@@ -55,13 +55,13 @@ public class Only_led_no_RPM_OG extends LinearOpMode {
         // -------- LED SETUP --------
         ledRed.setMode(DigitalChannel.Mode.OUTPUT);
         ledGreen.setMode(DigitalChannel.Mode.OUTPUT);
-        setLED(false, true); // RED by default
+        setLED(false, true);
 
-        // -------- MOTOR DIRECTIONS --------
+        // -motor directions
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
 
-        // -------- MOTOR MODES --------
+        // -motor modes
         frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -80,10 +80,10 @@ public class Only_led_no_RPM_OG extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
-        // ================= MAIN LOOP =================
+        // main loop
         while (opModeIsActive()) {
 
-            // -------- MECANUM DRIVE --------
+            // macanum
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1;
             double turn = gamepad1.right_stick_x * 0.8;
@@ -106,7 +106,7 @@ public class Only_led_no_RPM_OG extends LinearOpMode {
             backLeftDrive.setPower(bl);
             backRightDrive.setPower(br);
 
-            // -------- LAUNCHER CONTROL --------
+            // launching
             if (gamepad1.right_bumper) {
                 launcher.setVelocity(TARGET_VELOCITY);
                 updateLauncherLED();
@@ -133,11 +133,11 @@ public class Only_led_no_RPM_OG extends LinearOpMode {
                 leftFeeder.setPower(0);
             }
 
-            // -------- FLYWHEEL STABILITY & FEEDING --------
+            // flywheel stability and feeding
             double velocity = launcher.getVelocity();
             boolean inRange = Math.abs(velocity - TARGET_VELOCITY) < RPM_TOLERANCE;
 
-            // -------- TELEMETRY --------
+            // telemetry
             telemetry.addData("Runtime", runtime.toString());
             telemetry.addData("Launcher RPM", "%.0f", getLauncherRPM());
             telemetry.addData("Launcher Velocity", "%.0f", launcher.getVelocity());
@@ -145,7 +145,7 @@ public class Only_led_no_RPM_OG extends LinearOpMode {
         }
     }
 
-    // ================= FUNCTIONS =================
+    // functions
 
     public double getLauncherRPM() {
         return (launcher.getVelocity() / TICKS_PER_REV) * 60.0;

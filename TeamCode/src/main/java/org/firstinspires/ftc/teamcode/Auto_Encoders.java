@@ -21,8 +21,7 @@ public class Auto_Encoders extends LinearOpMode {
     static final double TICKS_PER_INCH =
             TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_IN);
 
-    // ---------------- SHOOTER CONSTANTS ----------------
-//    static final double RPM_TOLERANCE = 300;
+    // shootr constants
     static final int SHOTS = 3;
     static final double TARGET_VELOCITY = 1350; // ticks/sec
 
@@ -60,25 +59,11 @@ public class Auto_Encoders extends LinearOpMode {
         waitForStart();
         if (!opModeIsActive()) return;
 
-        // =====================================================
-        // 1️⃣ DRIVE FORWARD
-        // =====================================================
         driveEncoder(-13, 0.6);
 
-
-        // ======================================       ===============
-        // 2️⃣ SPIN UP + SHOOT 3 BALLS (ENCODER CONTROLLED)
-        // =====================================================
         shootBallsEncoderBased();
-
-        // =====================================================
-        // 3️⃣ DRIVE BACK
-        // =====================================================
     }
 
-    // =====================================================
-    // SHOOTER FUNCTION (NO SLEEP)
-    // =====================================================
     void shootBallsEncoderBased() {
 
         launcher.setVelocity(TARGET_VELOCITY);

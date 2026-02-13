@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.Auto_Encoders.WHEEL_DIAMETER_IN;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,22 +11,20 @@ public class Auto_Goal_Line extends LinearOpMode {
 
     private DcMotor frontLeftDrive, frontRightDrive, backLeftDrive, backRightDrive;
 
-    // ---------------- DRIVE CONSTANTS ----------------
-    static final double TICKS_PER_REV = 537.6;     // GoBILDA 312 RPM
-    static final double WHEEL_DIAMETER_IN = 3.78;
+    // drive constants
+    static final double TICKS_PER_REV = 537.6;
     static final double TICKS_PER_INCH =
             TICKS_PER_REV / (Math.PI * WHEEL_DIAMETER_IN);
 
     @Override
     public void runOpMode() {
 
-        // ---------------- HARDWARE MAP ----------------
+        // hardware map
         frontLeftDrive  = hardwareMap.get(DcMotor.class, "front_left_drive");
         frontRightDrive = hardwareMap.get(DcMotor.class, "front_right_drive");
         backLeftDrive   = hardwareMap.get(DcMotor.class, "back_left_drive");
         backRightDrive  = hardwareMap.get(DcMotor.class, "back_right_drive");
 
-        // Reverse left side (mecanum standard)
         frontLeftDrive.setDirection(DcMotor.Direction.REVERSE);
         backLeftDrive.setDirection(DcMotor.Direction.REVERSE);
 
@@ -39,15 +39,10 @@ public class Auto_Goal_Line extends LinearOpMode {
         waitForStart();
         if (!opModeIsActive()) return;
 
-        // =====================================================
-        // DRIVE FORWARD 16 INCHES
-        // =====================================================
         driveEncoder(-17, 0.45);
     }
 
-    // =====================================================
-    // ENCODER DRIVE FUNCTION
-    // =====================================================
+    // encoders
     void resetEncoders() {
         frontLeftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

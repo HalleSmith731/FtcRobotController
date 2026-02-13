@@ -27,21 +27,13 @@ public class Strafe_Auto extends LinearOpMode {
 
         if (opModeIsActive()) {
 
-            // -------------------------
-            // Move forward 24 inches
-            // -------------------------
+
             driveForwardTimed(0.5, 1500); // Tune 1500ms to match 24 inches
 
-            // -------------------------
-            // Strafe right 24 inches
-            // -------------------------
             strafeRightTimed(0.5, 1500); // Tune 1500ms to match 24 inches
         }
     }
 
-    // -------------------------
-    // Drive straight forward/backward
-    // -------------------------
     private void driveForwardTimed(double power, long timeMs) {
         frontLeftDrive.setPower(power);
         frontRightDrive.setPower(power);
@@ -52,9 +44,6 @@ public class Strafe_Auto extends LinearOpMode {
         stopDrive();
     }
 
-    // -------------------------
-    // Strafe right
-    // -------------------------
     private void strafeRightTimed(double power, long timeMs) {
         frontLeftDrive.setPower(power);
         frontRightDrive.setPower(-power);
@@ -65,9 +54,6 @@ public class Strafe_Auto extends LinearOpMode {
         stopDrive();
     }
 
-    // -------------------------
-    // Stop all motors
-    // -------------------------
     private void stopDrive() {
         frontLeftDrive.setPower(0);
         frontRightDrive.setPower(0);

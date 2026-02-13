@@ -101,7 +101,6 @@ public class TeleOp_competition_autofeed extends LinearOpMode {
                 flywheelStable = false; // reset stable flag if launcher stops
             }
 
-            // --- AUTO-FEEDER WITH 0.25s STABILITY ---
             double velocity = launcher.getVelocity();
             boolean inRange = Math.abs(velocity - TARGET_VELOCITY) < RPM_TOLERANCE;
 
@@ -111,7 +110,7 @@ public class TeleOp_competition_autofeed extends LinearOpMode {
                     flywheelStableTimer.reset();
                 }
 
-                // Only feed after 0.25s stable
+
                 if (flywheelStableTimer.seconds() >= FLYWHEEL_STABLE_TIME) {
                     leftFeeder.setPower(-1);
                     rightFeeder.setPower(1);
